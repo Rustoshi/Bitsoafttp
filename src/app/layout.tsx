@@ -9,6 +9,8 @@ import { getPublicAppSettings } from "@/lib/actions/public";
 import "./globals.css";
 import Script from "next/script";
 
+export const dynamic = "force-dynamic";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
