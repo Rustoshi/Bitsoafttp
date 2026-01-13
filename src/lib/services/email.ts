@@ -39,8 +39,8 @@ function emailTemplate(content: string, siteName: string): string {
         <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); padding: 32px 40px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; mso-line-height-rule: exactly; line-height: 1.2;"><span style="color: #ffffff !important; -webkit-text-fill-color: #ffffff;">${siteName}</span></h1>
+            <td style="padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; mso-line-height-rule: exactly; line-height: 1.2;">${siteName}</h1>
             </td>
           </tr>
           <!-- Content -->
