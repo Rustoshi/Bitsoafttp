@@ -7,6 +7,7 @@ import { TradeNotifications } from "@/components/ui/trade-notifications";
 import { GTranslateWidget } from "@/components/ui/gtranslate-widget";
 import { getPublicAppSettings } from "@/lib/actions/public";
 import "./globals.css";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -135,6 +136,7 @@ export default function RootLayout({
             <GTranslateWidget />
           </QueryProvider>
         </ThemeProvider>
+        <Script src="https://code.jivosite.com/widget/alKkPDFJtG" async/>
       </body>
     </html>
   );
