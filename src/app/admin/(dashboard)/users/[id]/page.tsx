@@ -38,23 +38,23 @@ export default async function UserDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/users">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link href="/admin/users" className="shrink-0">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary">{user.fullName}</h1>
-            <p className="text-text-muted">{user.email}</p>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-text-primary truncate">{user.fullName}</h1>
+            <p className="text-text-muted text-sm truncate">{user.email}</p>
           </div>
         </div>
         <UserActions user={user} />
       </div>
 
       {/* Status Badges */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {user.isBlocked && <StatusBadge status="blocked" />}
         {user.isSuspended && !user.isBlocked && <StatusBadge status="suspended" />}
         {!user.isBlocked && !user.isSuspended && <StatusBadge status="active" />}

@@ -88,7 +88,7 @@ export function DataTable<T extends { id: string }>({
   }
 
   return (
-    <div className="rounded-md border border-border-default">
+    <div className="rounded-md border border-border-default overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="border-border-default bg-surface-muted hover:bg-surface-muted">

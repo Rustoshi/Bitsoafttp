@@ -584,6 +584,38 @@
 }
 
 /* ============================================ */
+/* SCROLLBAR UTILITIES */
+/* ============================================ */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================ */
+/* MOBILE RESPONSIVENESS FIXES */
+/* ============================================ */
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow on mobile */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Ensure inputs don't overflow */
+  input, textarea, select {
+    max-width: 100%;
+  }
+  
+  /* Fix dialog/modal width on mobile */
+  [data-slot="dialog-content"] {
+    max-width: calc(100vw - 2rem) !important;
+    margin: 1rem;
+  }
+}
+
+/* ============================================ */
 /* JIVO CHAT WIDGET - Mobile Positioning */
 /* ============================================ */
 @media (max-width: 768px) {

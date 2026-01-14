@@ -24,7 +24,7 @@ async function TransactionsContent({ searchParams }: TransactionsContentProps) {
 
   return (
     <Card className="border-border-default bg-surface">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="text-text-primary">All Transactions</CardTitle>
         <div className="flex gap-2">
           <Link href="/admin/transactions?status=PENDING">
@@ -44,7 +44,7 @@ async function TransactionsContent({ searchParams }: TransactionsContentProps) {
         <TransactionsTable transactions={transactions as any} />
 
         {pagination.totalPages > 1 && (
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-text-muted">
               Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
               {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
