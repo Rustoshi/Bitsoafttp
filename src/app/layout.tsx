@@ -89,10 +89,11 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [
         {
-          url: "/preview.jpeg",
+          url: `${SITE_URL}/preview.jpeg`,
           width: 1200,
           height: 630,
           alt: `${siteName} - Investment Platform`,
+          type: "image/jpeg",
         },
       ],
     },
@@ -100,7 +101,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: `${siteName} - Secure Investment Platform`,
       description,
-      images: ["/preview.jpeg"],
+      images: [`${SITE_URL}/preview.jpeg`],
       creator: `@${siteName.replace(/\s+/g, "")}`,
     },
     verification: {

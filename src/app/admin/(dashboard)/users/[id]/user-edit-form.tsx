@@ -547,7 +547,7 @@ export function UserEditForm({ user }: UserEditFormProps) {
                 name="withdrawalFee"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-text-secondary">Withdrawal Fee (%)</FormLabel>
+                    <FormLabel className="text-text-secondary">Withdrawal Fee ({user.currency})</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -557,6 +557,9 @@ export function UserEditForm({ user }: UserEditFormProps) {
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                       />
                     </FormControl>
+                    <FormDescription className="text-xs">
+                      Flat fee amount that blocks withdrawal until paid
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
