@@ -509,7 +509,7 @@ export function DashboardContent({ user, btcPriceData, recentTransactions }: Das
       ═══════════════════════════════════════════════════════════════════ */}
       <motion.div variants={itemVariants}>
         <div className="grid gap-2 grid-cols-2 lg:grid-cols-4">
-          <AnimatedButton href="/dashboard/wallets" variant="default">
+          <AnimatedButton href="/dashboard/deposit" variant="default">
             <ArrowDownToLine className="h-4 w-4" />
             <span>Deposit</span>
           </AnimatedButton>
@@ -517,7 +517,7 @@ export function DashboardContent({ user, btcPriceData, recentTransactions }: Das
             <Repeat className="h-4 w-4" />
             <span>Swap</span>
           </AnimatedButton>
-          <AnimatedButton href="/dashboard/wallets">
+          <AnimatedButton href="/dashboard/withdraw">
             <ArrowUpFromLine className="h-4 w-4" />
             <span>Withdraw</span>
           </AnimatedButton>

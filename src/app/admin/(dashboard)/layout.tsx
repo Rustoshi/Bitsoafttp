@@ -34,7 +34,9 @@ export default async function AdminLayout({
         <AdminSidebar siteName={siteName} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <AdminHeader siteName={siteName} />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+          <main className="flex-1 overflow-auto p-4 md:p-6">
+            <div className="min-w-[800px]">{children}</div>
+          </main>
         </div>
       </div>
     </SessionProvider>
