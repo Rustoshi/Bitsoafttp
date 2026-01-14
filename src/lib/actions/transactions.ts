@@ -323,6 +323,81 @@ async function reconcileUserBalance(
   }
 }
 
+export async function deleteTransaction(transactionId: string) {
+  const admin = await requireAdmin();
+
+  const tx = await collections.transactions().findOne({ _id: toObjectId(transactionId) }) as Transaction | null;
+  if (!tx) {
+    throw new Error("Transaction not found");
+  }
+
+  // If the transaction was approved, we need to reverse the balance changes
+  if (tx.status === "APPROVED") {
+    const userId = tx.userId.toString();
+    const balanceField = tx.asset === "BTC" ? "bitcoinBalance" : "fiatBalance";
+
+    switch (tx.type) {
+      case "DEPOSIT":
+        // Reverse deposit: subtract from balance and totalDeposited
+        await collections.users().updateOne(
+          { _id: tx.userId },
+          { $inc: { [balanceField]: -tx.amount, totalDeposited: -tx.amount } }
+        );
+        break;
+      case "WITHDRAWAL":
+        // Reverse withdrawal: add back to balance and subtract from totalWithdrawn
+        await collections.users().updateOne(
+          { _id: tx.userId },
+          { $inc: { [balanceField]: tx.amount, totalWithdrawn: -tx.amount } }
+        );
+        break;
+      case "PROFIT":
+        // Reverse profit: subtract from profitBalance and fiatBalance
+        await collections.users().updateOne(
+          { _id: tx.userId },
+          { $inc: { profitBalance: -tx.amount, fiatBalance: -tx.amount } }
+        );
+        break;
+      case "BONUS":
+        // Reverse bonus: subtract from totalBonus
+        await collections.users().updateOne(
+          { _id: tx.userId },
+          { $inc: { totalBonus: -tx.amount } }
+        );
+        break;
+    }
+  } else if (tx.status === "PENDING" && tx.type === "WITHDRAWAL") {
+    // For pending withdrawals, the balance was already deducted - refund it
+    const balanceField = tx.asset === "BTC" ? "bitcoinBalance" : "fiatBalance";
+    await collections.users().updateOne(
+      { _id: tx.userId },
+      { $inc: { [balanceField]: tx.amount } }
+    );
+  }
+
+  // Delete the transaction
+  await collections.transactions().deleteOne({ _id: toObjectId(transactionId) });
+
+  await createAuditLog({
+    adminId: admin.id,
+    action: AuditActions.TRANSACTION_DELETED,
+    entityType: "Transaction",
+    entityId: transactionId,
+    details: {
+      userId: tx.userId.toString(),
+      type: tx.type,
+      asset: tx.asset,
+      amount: tx.amount,
+      status: tx.status,
+      reference: tx.reference,
+    },
+  });
+
+  revalidatePath("/admin/transactions");
+  revalidatePath(`/admin/users/${tx.userId.toString()}`);
+  return { success: true };
+}
+
 export async function getPendingTransactionsCount() {
   await requireAdmin();
   return collections.transactions().countDocuments({ status: "PENDING" });
