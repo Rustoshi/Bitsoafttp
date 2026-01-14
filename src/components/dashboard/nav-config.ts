@@ -11,6 +11,7 @@ import {
   Repeat,
   LineChart,
   Layers,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -83,6 +84,12 @@ export const sidebarNavItems: NavItem[] = [
     href: "/dashboard/kyc",
     icon: FileCheck,
     description: "Identity verification",
+  },
+  {
+    title: "Referrals",
+    href: "/dashboard/referrals",
+    icon: Users,
+    description: "Invite friends & earn",
   },
   {
     title: "Settings",

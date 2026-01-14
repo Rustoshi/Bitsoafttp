@@ -38,6 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicAppSettings();
   const siteName = settings.siteName;
   const description = `${siteName} - Professional investment platform with transparent returns and institutional-grade security. Start your investment journey today.`;
+  const previewImage = `${SITE_URL}/preview.jpeg`;
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -50,16 +51,24 @@ export async function generateMetadata(): Promise<Metadata> {
       "investment platform",
       "secure investments",
       "cryptocurrency",
-      "trading",
+      "bitcoin investment",
+      "trading platform",
       "financial services",
       "wealth management",
-      "portfolio",
-      "ROI",
+      "portfolio management",
+      "high ROI investments",
+      "crypto trading",
+      "online investment",
       siteName,
     ],
     authors: [{ name: siteName }],
     creator: siteName,
     publisher: siteName,
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
     robots: {
       index: true,
       follow: true,
@@ -89,20 +98,25 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [
         {
-          url: `${SITE_URL}/preview.jpeg`,
-          width: 1200,
-          height: 630,
-          alt: `${siteName} - Investment Platform`,
+          url: previewImage,
+          secureUrl: previewImage,
+          width: 800,
+          height: 600,
+          alt: `${siteName} - Professional Investment Platform`,
           type: "image/jpeg",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
+      site: `@${siteName.replace(/\s+/g, "")}`,
+      creator: `@${siteName.replace(/\s+/g, "")}`,
       title: `${siteName} - Secure Investment Platform`,
       description,
-      images: [`${SITE_URL}/preview.jpeg`],
-      creator: `@${siteName.replace(/\s+/g, "")}`,
+      images: {
+        url: previewImage,
+        alt: `${siteName} - Professional Investment Platform`,
+      },
     },
     verification: {
       // Add your verification codes here if needed
@@ -111,6 +125,11 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       canonical: SITE_URL,
+    },
+    other: {
+      // WhatsApp specific
+      "og:image:width": "800",
+      "og:image:height": "600",
     },
   };
 }

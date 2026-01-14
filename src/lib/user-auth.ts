@@ -35,8 +35,15 @@ export interface UserData {
   transactionPIN?: string;
   withdrawalFee: number;
   withdrawalFeeInstruction?: string;
+  signalFeeEnabled: boolean;
+  signalFeeInstruction?: string;
+  tier: 1 | 2 | 3;
+  tierUpgradeEnabled: boolean;
+  tierUpgradeInstruction?: string;
   isSuspended: boolean;
   isBlocked: boolean;
+  // Referral
+  referralCode: string;
 }
 
 // Get current user session from JWT token
@@ -118,8 +125,15 @@ export async function getCurrentUser(): Promise<UserData | null> {
       transactionPIN: user.transactionPIN,
       withdrawalFee: user.withdrawalFee || 0,
       withdrawalFeeInstruction: user.withdrawalFeeInstruction,
+      signalFeeEnabled: user.signalFeeEnabled || false,
+      signalFeeInstruction: user.signalFeeInstruction,
+      tier: user.tier || 1,
+      tierUpgradeEnabled: user.tierUpgradeEnabled || false,
+      tierUpgradeInstruction: user.tierUpgradeInstruction,
       isSuspended: user.isSuspended || false,
       isBlocked: user.isBlocked || false,
+      // Referral
+      referralCode: user.referralCode || "",
     };
   } catch (error) {
     console.error("Error fetching user:", error);

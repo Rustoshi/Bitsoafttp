@@ -157,6 +157,32 @@ export default async function UserDetailPage({
                     {user.currentPlan?.name || "None"}
                   </span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Transaction PIN</span>
+                  <span className="font-mono text-text-primary">
+                    {user.transactionPIN || "Not set"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Referral Code</span>
+                  <span className="font-mono text-text-primary">
+                    {user.referralCode || "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Referrals</span>
+                  <span className="text-text-primary">
+                    {user.referralCount || 0} users
+                  </span>
+                </div>
+                {user.referredBy && (
+                  <div className="flex justify-between">
+                    <span className="text-text-muted">Referred By</span>
+                    <span className="text-text-primary">
+                      {user.referredBy.fullName}
+                    </span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

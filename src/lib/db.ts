@@ -77,9 +77,17 @@ export interface User {
   transactionPIN?: string;
   withdrawalFee: number;
   withdrawalFeeInstruction?: string;
+  signalFeeEnabled: boolean;
+  signalFeeInstruction?: string;
+  tier: 1 | 2 | 3;
+  tierUpgradeEnabled: boolean;
+  tierUpgradeInstruction?: string;
   isSuspended: boolean;
   isBlocked: boolean;
   currentPlanId?: ObjectId;
+  // Referral system
+  referralCode: string;
+  referredBy?: ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

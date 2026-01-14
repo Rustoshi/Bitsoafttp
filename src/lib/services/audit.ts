@@ -60,8 +60,6 @@ export const AuditActions = {
   KYC_APPROVED: "KYC_APPROVED",
   KYC_DECLINED: "KYC_DECLINED",
 
-  
-
   // Settings actions
   SETTINGS_UPDATED: "SETTINGS_UPDATED",
   WALLET_ADDED: "WALLET_ADDED",

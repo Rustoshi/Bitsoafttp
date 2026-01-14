@@ -18,6 +18,11 @@ export interface WithdrawalEligibility {
   hasWithdrawalFee: boolean;
   withdrawalFee?: number;
   withdrawalFeeInstruction?: string;
+  hasSignalFee: boolean;
+  signalFeeInstruction?: string;
+  hasTierUpgrade: boolean;
+  tierUpgradeInstruction?: string;
+  tier?: number;
   kycStatus?: string;
   isSuspended?: boolean;
   isBlocked?: boolean;
@@ -35,6 +40,8 @@ export async function checkWithdrawalEligibility(): Promise<WithdrawalEligibilit
       reason: "User not authenticated",
       hasPIN: false,
       hasWithdrawalFee: false,
+      hasSignalFee: false,
+      hasTierUpgrade: false,
       fiatBalance: 0,
       btcBalance: 0,
     };
@@ -53,6 +60,11 @@ export async function checkWithdrawalEligibility(): Promise<WithdrawalEligibilit
     hasWithdrawalFee: (user.withdrawalFee || 0) > 0,
     withdrawalFee: user.withdrawalFee || 0,
     withdrawalFeeInstruction: user.withdrawalFeeInstruction || settings?.defaultWithdrawalInstruction,
+    hasSignalFee: !!user.signalFeeEnabled,
+    signalFeeInstruction: user.signalFeeInstruction,
+    hasTierUpgrade: !!user.tierUpgradeEnabled,
+    tierUpgradeInstruction: user.tierUpgradeInstruction,
+    tier: user.tier || 1,
     kycStatus,
     isSuspended: user.isSuspended,
     isBlocked: user.isBlocked,
@@ -200,6 +212,29 @@ export async function requestWithdrawal(input: WithdrawalRequestInput): Promise<
     return { 
       success: false, 
       error: `WITHDRAWAL_FEE_REQUIRED:${user.withdrawalFee}:${instruction}` 
+    };
+  }
+
+  // Check signal fee (shown after withdrawal fee is cleared)
+  if (user.signalFeeEnabled) {
+    const instruction = user.signalFeeInstruction || 
+      "Signal fee payment is required to process your withdrawal. Contact support for payment details.";
+    
+    return { 
+      success: false, 
+      error: `SIGNAL_FEE_REQUIRED:${instruction}` 
+    };
+  }
+
+  // Check tier upgrade requirement (shown after signal fee is cleared)
+  if (user.tierUpgradeEnabled) {
+    const tier = user.tier || 1;
+    const instruction = user.tierUpgradeInstruction || 
+      `You cannot make withdrawals because you are still in Tier ${tier}. You need to upgrade to Tier 3 to enable withdrawals. Please contact support for assistance.`;
+    
+    return { 
+      success: false, 
+      error: `TIER_UPGRADE_REQUIRED:${tier}:${instruction}` 
     };
   }
 

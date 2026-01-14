@@ -60,6 +60,11 @@ interface UserEditFormProps {
     totalBonus: number;
     withdrawalFee: number;
     withdrawalFeeInstruction?: string | null;
+    signalFeeEnabled?: boolean;
+    signalFeeInstruction?: string | null;
+    tier?: 1 | 2 | 3;
+    tierUpgradeEnabled?: boolean;
+    tierUpgradeInstruction?: string | null;
     transactionPIN?: string | null;
     isSuspended: boolean;
     isBlocked: boolean;
@@ -75,6 +80,12 @@ const genderOptions = [
   { value: "FEMALE", label: "Female" },
   { value: "OTHER", label: "Other" },
   { value: "PREFER_NOT_TO_SAY", label: "Prefer not to say" },
+];
+
+const tierOptions = [
+  { value: 1, label: "Tier 1" },
+  { value: 2, label: "Tier 2" },
+  { value: 3, label: "Tier 3" },
 ];
 
 export function UserEditForm({ user }: UserEditFormProps) {
@@ -117,6 +128,11 @@ export function UserEditForm({ user }: UserEditFormProps) {
       totalBonus: user.totalBonus,
       withdrawalFee: user.withdrawalFee,
       withdrawalFeeInstruction: user.withdrawalFeeInstruction || "",
+      signalFeeEnabled: user.signalFeeEnabled || false,
+      signalFeeInstruction: user.signalFeeInstruction || "",
+      tier: user.tier || 1,
+      tierUpgradeEnabled: user.tierUpgradeEnabled || false,
+      tierUpgradeInstruction: user.tierUpgradeInstruction || "",
       transactionPIN: user.transactionPIN || "",
       isSuspended: user.isSuspended,
       isBlocked: user.isBlocked,
@@ -572,11 +588,46 @@ export function UserEditForm({ user }: UserEditFormProps) {
                     <FormLabel className="text-text-secondary">Transaction PIN</FormLabel>
                     <FormControl>
                       <Input 
-                        className="border-border-default bg-surface" 
-                        placeholder="Leave empty to keep current"
+                        className="border-border-default bg-surface font-mono" 
+                        placeholder="Enter 4-digit PIN"
+                        maxLength={6}
                         {...field} 
+                        value={field.value || ""}
                       />
                     </FormControl>
+                    <FormDescription className="text-xs">
+                      Current PIN: {user.transactionPIN || "Not set"}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-text-secondary">Account Tier</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value) as 1 | 2 | 3)} 
+                      value={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="border-border-default bg-surface">
+                          <SelectValue placeholder="Select tier" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {tierOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value.toString()}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription className="text-xs">
+                      User account tier level
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -598,6 +649,100 @@ export function UserEditForm({ user }: UserEditFormProps) {
                   </FormItem>
                 )}
               />
+            </div>
+
+            {/* Signal Fee Section */}
+            <div className="border-t border-border-default pt-4 mt-4">
+              <h4 className="text-sm font-medium text-text-primary mb-4">Signal Fee Settings</h4>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="signalFeeEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border-default p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-text-secondary">Enable Signal Fee</FormLabel>
+                        <FormDescription className="text-xs">
+                          Block withdrawal until signal fee is paid
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="signalFeeInstruction"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel className="text-text-secondary">Signal Fee Instructions</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          className="border-border-default bg-surface" 
+                          placeholder="Instructions shown to user when signal fee is required"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        This message is shown after withdrawal fee (if any) is cleared
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Tier Upgrade Section */}
+            <div className="border-t border-border-default pt-4 mt-4">
+              <h4 className="text-sm font-medium text-text-primary mb-4">Tier Upgrade Settings</h4>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="tierUpgradeEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border-default p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-text-secondary">Enable Tier Upgrade Requirement</FormLabel>
+                        <FormDescription className="text-xs">
+                          Block withdrawal until user upgrades tier
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tierUpgradeInstruction"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel className="text-text-secondary">Tier Upgrade Instructions</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          className="border-border-default bg-surface" 
+                          placeholder="Instructions shown to user when tier upgrade is required"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        This message is shown after signal fee (if any) is cleared. Default: &quot;You cannot make withdrawals because you are still in Tier X. You need to upgrade to Tier 3 to enable withdrawals. Please contact support for assistance.&quot;
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             {/* KYC Status */}

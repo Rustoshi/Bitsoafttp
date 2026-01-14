@@ -43,9 +43,10 @@ const passwordRequirements = [
 
 interface RegisterFormProps {
   siteName: string;
+  referralCode?: string;
 }
 
-export function RegisterForm({ siteName }: RegisterFormProps) {
+export function RegisterForm({ siteName, referralCode: initialReferralCode }: RegisterFormProps) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -56,6 +57,7 @@ export function RegisterForm({ siteName }: RegisterFormProps) {
   const [countrySearch, setCountrySearch] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
+  const [referralCode, setReferralCode] = useState(initialReferralCode || "");
   const [formState, setFormState] = useState<FormState>({
     status: "idle",
     message: "",
@@ -98,6 +100,7 @@ export function RegisterForm({ siteName }: RegisterFormProps) {
       dob: formData.get("dob") as string,
       gender: selectedGender || undefined,
       currency: selectedCurrency,
+      referralCode: referralCode.trim().toUpperCase() || undefined,
     };
 
     // Client-side validation
@@ -448,6 +451,23 @@ export function RegisterForm({ siteName }: RegisterFormProps) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+              <Input
+                id="referralCode"
+                name="referralCode"
+                type="text"
+                placeholder="Enter referral code"
+                className="h-11 font-mono uppercase tracking-wider"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                maxLength={8}
+              />
+              <p className="text-xs text-text-muted">
+                Have a referral code? Enter it here to connect with your referrer.
+              </p>
             </div>
 
             <div className="pt-2">

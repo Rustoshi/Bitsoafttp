@@ -17,7 +17,18 @@ const registerSchema = z.object({
   dob: z.string().optional(),
   gender: z.enum(["MALE", "FEMALE", "OTHER", "PREFER_NOT_TO_SAY"]).optional(),
   currency: z.string().default("USD"),
+  referralCode: z.string().optional(),
 });
+
+// Generate a unique referral code
+function generateReferralCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Exclude confusing chars like 0, O, 1, I
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
 
 export async function POST(request: Request) {
   try {
@@ -39,6 +50,27 @@ export async function POST(request: Request) {
     // Hash password
     const passwordHash = await hash(validated.password, 12);
 
+    // Handle referral - find referrer by code
+    let referredBy: import("mongodb").ObjectId | undefined;
+    if (validated.referralCode) {
+      const referrer = await collections.users().findOne({
+        referralCode: validated.referralCode.toUpperCase(),
+      });
+      if (referrer) {
+        referredBy = referrer._id;
+      }
+    }
+
+    // Generate unique referral code for new user
+    let referralCode = generateReferralCode();
+    // Ensure uniqueness (very unlikely to collide but check anyway)
+    while (await collections.users().findOne({ referralCode })) {
+      referralCode = generateReferralCode();
+    }
+
+    // Generate random 4-digit transaction PIN (stored as plain text)
+    const transactionPIN = Math.floor(1000 + Math.random() * 9000).toString();
+
     // Create user
     const now = new Date();
     const result = await collections.users().insertOne({
@@ -58,9 +90,15 @@ export async function POST(request: Request) {
       activeInvestment: 0,
       totalBonus: 0,
       withdrawalFee: 0,
+      signalFeeEnabled: false,
+      transactionPIN,
+      tier: 1 as const,
+      tierUpgradeEnabled: false,
       isSuspended: false,
       isBlocked: false,
       emailVerified: false,
+      referralCode,
+      referredBy,
       createdAt: now,
       updatedAt: now,
     });

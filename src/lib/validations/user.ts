@@ -16,6 +16,11 @@ export const createUserSchema = z.object({
   totalBonus: z.number().min(0).default(10),
   withdrawalFee: z.number().min(0).default(0),
   withdrawalFeeInstruction: z.string().optional(),
+  signalFeeEnabled: z.boolean().default(false),
+  signalFeeInstruction: z.string().optional(),
+  tier: z.union([z.literal(1), z.literal(2), z.literal(3)]).default(1),
+  tierUpgradeEnabled: z.boolean().default(false),
+  tierUpgradeInstruction: z.string().optional(),
   transactionPIN: z.string().min(4).max(6).optional(),
   accountAge: z.string().optional(), // ISO date string for custom account creation date
   currentPlanId: z.string().optional(),
@@ -64,6 +69,11 @@ export const adminEditUserSchema = z.object({
   // Settings
   withdrawalFee: z.number().min(0),
   withdrawalFeeInstruction: z.string().optional(),
+  signalFeeEnabled: z.boolean(),
+  signalFeeInstruction: z.string().optional(),
+  tier: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  tierUpgradeEnabled: z.boolean(),
+  tierUpgradeInstruction: z.string().optional(),
   transactionPIN: z.string().optional(),
   // Status
   isSuspended: z.boolean(),

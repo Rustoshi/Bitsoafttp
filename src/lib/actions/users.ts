@@ -109,11 +109,13 @@ export async function getUserById(id: string) {
   const user = await collections.users().findOne({ _id: toObjectId(id) }) as User | null;
   if (!user) return null;
 
-  const [currentPlan, kyc, transactions, investments] = await Promise.all([
+  const [currentPlan, kyc, transactions, investments, referralCount, referrer] = await Promise.all([
     user.currentPlanId ? collections.investmentPlans().findOne({ _id: user.currentPlanId }) : null,
     collections.kyc().findOne({ userId: user._id }) as Promise<KYC | null>,
     collections.transactions().find({ userId: user._id }).sort({ createdAt: -1 }).limit(10).toArray() as Promise<Transaction[]>,
     collections.userInvestments().find({ userId: user._id }).sort({ createdAt: -1 }).toArray() as Promise<UserInvestment[]>,
+    collections.users().countDocuments({ referredBy: user._id }),
+    user.referredBy ? collections.users().findOne({ _id: user.referredBy }, { projection: { fullName: 1, email: 1 } }) : null,
   ]);
 
   // Get plans for investments - properly serialize
@@ -137,7 +139,7 @@ export async function getUserById(id: string) {
   );
 
   // Destructure to remove _id and properly serialize
-  const { _id, currentPlanId, ...userData } = user;
+  const { _id, currentPlanId, referredBy, ...userData } = user;
 
   return {
     ...userData,
@@ -169,7 +171,24 @@ export async function getUserById(id: string) {
       };
     }),
     investments: investmentsWithPlans,
+    // Referral data
+    referralCount,
+    referredBy: referrer ? {
+      id: referrer._id.toString(),
+      fullName: referrer.fullName,
+      email: referrer.email,
+    } : null,
   };
+}
+
+// Generate a unique referral code
+function generateReferralCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
 }
 
 export async function createUser(input: CreateUserInput) {
@@ -184,6 +203,12 @@ export async function createUser(input: CreateUserInput) {
   const now = new Date();
   const createdAt = validated.accountAge ? new Date(validated.accountAge) : now;
   const passwordHash = await hash(validated.password, 12);
+
+  // Generate unique referral code
+  let referralCode = generateReferralCode();
+  while (await collections.users().findOne({ referralCode })) {
+    referralCode = generateReferralCode();
+  }
   
   const result = await collections.users().insertOne({
     fullName: validated.fullName,
@@ -205,10 +230,16 @@ export async function createUser(input: CreateUserInput) {
     totalBonus: validated.totalBonus || 10,
     withdrawalFee: validated.withdrawalFee || 0,
     withdrawalFeeInstruction: validated.withdrawalFeeInstruction,
+    signalFeeEnabled: validated.signalFeeEnabled || false,
+    signalFeeInstruction: validated.signalFeeInstruction,
+    tier: validated.tier || 1,
+    tierUpgradeEnabled: validated.tierUpgradeEnabled || false,
+    tierUpgradeInstruction: validated.tierUpgradeInstruction,
     transactionPIN: validated.transactionPIN, // Store as plain text
     isSuspended: false,
     isBlocked: false,
     currentPlanId: validated.currentPlanId ? toObjectId(validated.currentPlanId) : undefined,
+    referralCode,
     createdAt,
     updatedAt: now,
   });
@@ -438,6 +469,11 @@ export async function adminEditUser(input: AdminEditUserInput) {
     totalBonus: userData.totalBonus,
     withdrawalFee: userData.withdrawalFee,
     withdrawalFeeInstruction: userData.withdrawalFeeInstruction || null,
+    signalFeeEnabled: userData.signalFeeEnabled,
+    signalFeeInstruction: userData.signalFeeInstruction || null,
+    tier: userData.tier,
+    tierUpgradeEnabled: userData.tierUpgradeEnabled,
+    tierUpgradeInstruction: userData.tierUpgradeInstruction || null,
     transactionPIN: userData.transactionPIN || null,
     isSuspended: userData.isSuspended,
     isBlocked: userData.isBlocked,
