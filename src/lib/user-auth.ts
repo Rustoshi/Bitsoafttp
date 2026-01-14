@@ -44,6 +44,8 @@ export interface UserData {
   isBlocked: boolean;
   // Referral
   referralCode: string;
+  // Plan
+  currentPlanName?: string;
 }
 
 // Get current user session from JWT token
@@ -90,6 +92,13 @@ export async function getCurrentUser(): Promise<UserData | null> {
       return null;
     }
 
+    // Fetch current plan name if user has a plan
+    let currentPlanName: string | undefined;
+    if (user.currentPlanId) {
+      const plan = await collections.investmentPlans().findOne({ _id: user.currentPlanId });
+      currentPlanName = plan?.name;
+    }
+
     // Determine KYC status from kyc collection
     let kycStatus: string | undefined;
     if (kyc) {
@@ -134,6 +143,8 @@ export async function getCurrentUser(): Promise<UserData | null> {
       isBlocked: user.isBlocked || false,
       // Referral
       referralCode: user.referralCode || "",
+      // Plan
+      currentPlanName,
     };
   } catch (error) {
     console.error("Error fetching user:", error);

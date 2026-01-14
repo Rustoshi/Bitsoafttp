@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Wallet, TrendingUp, DollarSign, Bitcoin, ArrowDownToLine, ArrowUpFromLine, ArrowRight, TrendingDown, BarChart3, PlusCircle, Activity, ShieldCheck, ShieldAlert, Clock, ChevronRight, Lightbulb, Sparkles, Repeat } from "lucide-react";
+import { Wallet, TrendingUp, DollarSign, Bitcoin, ArrowDownToLine, ArrowUpFromLine, ArrowRight, TrendingDown, BarChart3, PlusCircle, Activity, ShieldCheck, ShieldAlert, Clock, ChevronRight, Lightbulb, Sparkles, Repeat, Crown, Users, Copy, Check } from "lucide-react";
 import { AnimatedButton } from "./animated-button";
 import type { UserData } from "@/lib/user-auth";
 import type { BtcPriceData } from "@/lib/actions/crypto";
@@ -326,6 +327,88 @@ function KycStatusBadge({ status }: { status?: string }) {
   );
 }
 
+// Account Info Widget - Plan, Tier, Referral Code
+function AccountInfoWidget({ 
+  tier, 
+  referralCode,
+  currentPlan 
+}: { 
+  tier: number;
+  referralCode: string;
+  currentPlan?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copyReferralCode = async () => {
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  const tierConfig = {
+    1: { label: "Tier 1", color: "text-text-muted", bgColor: "bg-surface-muted/50", borderColor: "border-white/5" },
+    2: { label: "Tier 2", color: "text-primary", bgColor: "bg-primary/10", borderColor: "border-primary/20" },
+    3: { label: "Tier 3", color: "text-warning", bgColor: "bg-warning/10", borderColor: "border-warning/20" },
+  };
+
+  const config = tierConfig[tier as keyof typeof tierConfig] || tierConfig[1];
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {/* Current Plan */}
+      <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-surface-muted/30 border border-white/5">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 mb-1.5">
+          <Crown className="h-3.5 w-3.5 text-primary" />
+        </div>
+        <span className="text-[10px] text-text-muted uppercase tracking-wider">Plan</span>
+        <span className="text-xs font-semibold text-text-primary truncate max-w-full">
+          {currentPlan || "None"}
+        </span>
+      </div>
+
+      {/* Account Tier */}
+      <div className={cn(
+        "flex flex-col items-center justify-center p-3 rounded-xl border",
+        config.bgColor,
+        config.borderColor
+      )}>
+        <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg mb-1.5", config.bgColor)}>
+          <ShieldCheck className={cn("h-3.5 w-3.5", config.color)} />
+        </div>
+        <span className="text-[10px] text-text-muted uppercase tracking-wider">Tier</span>
+        <span className={cn("text-xs font-semibold", config.color)}>
+          {config.label}
+        </span>
+      </div>
+
+      {/* Referral Code */}
+      <button
+        onClick={copyReferralCode}
+        className="flex flex-col items-center justify-center p-3 rounded-xl bg-surface-muted/30 border border-white/5 hover:bg-surface-muted/50 hover:border-white/10 transition-all group"
+      >
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 mb-1.5">
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-success" />
+          ) : (
+            <Users className="h-3.5 w-3.5 text-success" />
+          )}
+        </div>
+        <span className="text-[10px] text-text-muted uppercase tracking-wider">Referral</span>
+        <div className="flex items-center gap-1">
+          <span className="text-xs font-mono font-semibold text-text-primary">
+            {referralCode?.slice(0, 6) || "N/A"}
+          </span>
+          <Copy className="h-2.5 w-2.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+      </button>
+    </div>
+  );
+}
+
 // TradingView Advanced Chart - reliable dark mode
 function TradingViewWidget({ symbol, height = 220 }: { symbol: string; height?: number }) {
   return (
@@ -417,6 +500,17 @@ export function DashboardContent({ user, btcPriceData, recentTransactions }: Das
           <KycStatusBadge status={user.kycStatus} />
         </motion.div>
       )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          ACCOUNT INFO - Plan, Tier, Referral Code
+      ═══════════════════════════════════════════════════════════════════ */}
+      <motion.div variants={itemVariants}>
+        <AccountInfoWidget 
+          tier={user.tier}
+          referralCode={user.referralCode}
+          currentPlan={user.currentPlanName}
+        />
+      </motion.div>
 
       {/* ═══════════════════════════════════════════════════════════════════
           PRIMARY ASSETS - Fiat & Bitcoin (Premium emphasis)
