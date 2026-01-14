@@ -582,3 +582,16 @@
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ============================================ */
+/* JIVO CHAT WIDGET - Mobile Positioning */
+/* ============================================ */
+@media (max-width: 768px) {
+  /* Move JivoSite chat button above bottom nav (approx 70px height) */
+  jdiv[class*="wrap"],
+  jdiv[class*="button"],
+  #jivo-iframe-container,
+  .__jivoMobileButton {
+    bottom: 80px !important;
+  }
+}
