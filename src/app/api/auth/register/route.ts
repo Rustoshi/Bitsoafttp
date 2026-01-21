@@ -16,6 +16,7 @@ const registerSchema = z.object({
   country: z.string().min(2, "Country is required"),
   dob: z.string().optional(),
   gender: z.enum(["MALE", "FEMALE", "OTHER", "PREFER_NOT_TO_SAY"]).optional(),
+  phone: z.string().optional(),
   currency: z.string().default("USD"),
   referralCode: z.string().optional(),
 });
@@ -81,6 +82,7 @@ export async function POST(request: Request) {
       country: validated.country,
       dob: validated.dob ? new Date(validated.dob) : undefined,
       gender: validated.gender as Gender | undefined,
+      phone: validated.phone || undefined,
       currency: validated.currency,
       fiatBalance: 0,
       bitcoinBalance: 0,

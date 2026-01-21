@@ -58,6 +58,7 @@ export function RegisterForm({ siteName, referralCode: initialReferralCode }: Re
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
   const [referralCode, setReferralCode] = useState(initialReferralCode || "");
+  const [phone, setPhone] = useState("");
   const [formState, setFormState] = useState<FormState>({
     status: "idle",
     message: "",
@@ -99,6 +100,7 @@ export function RegisterForm({ siteName, referralCode: initialReferralCode }: Re
       country: selectedCountry,
       dob: formData.get("dob") as string,
       gender: selectedGender || undefined,
+      phone: phone.trim() || undefined,
       currency: selectedCurrency,
       referralCode: referralCode.trim().toUpperCase() || undefined,
     };
@@ -241,6 +243,20 @@ export function RegisterForm({ siteName, referralCode: initialReferralCode }: Re
                 autoComplete="email"
                 required
                 className="h-11"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="+1 234 567 8900"
+                autoComplete="tel"
+                className="h-11"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
 

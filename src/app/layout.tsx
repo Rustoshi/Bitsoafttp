@@ -5,9 +5,9 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TradeNotifications } from "@/components/ui/trade-notifications";
 import { GTranslateWidget } from "@/components/ui/gtranslate-widget";
+import { LiveChatWidget } from "@/components/ui/livechat-widget";
 import { getPublicAppSettings } from "@/lib/actions/public";
 import "./globals.css";
-import Script from "next/script";
 
 export const dynamic = "force-dynamic";
 
@@ -158,7 +158,7 @@ export default function RootLayout({
             <GTranslateWidget />
           </QueryProvider>
         </ThemeProvider>
-        <Script src="https://code.jivosite.com/widget/alKkPDFJtG" async/>
+        <LiveChatWidget />
       </body>
     </html>
   );
