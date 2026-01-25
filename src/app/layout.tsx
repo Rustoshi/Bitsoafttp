@@ -152,7 +152,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            {children}
+            {/* {children} */}
             <Toaster position="top-right" />
             <TradeNotifications />
             <GTranslateWidget />
