@@ -152,13 +152,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            {/* {children} */}
+            {children}
             <Toaster position="top-right" />
             <TradeNotifications />
             <GTranslateWidget />
           </QueryProvider>
         </ThemeProvider>
-        {/* <LiveChatWidget /> */}
       </body>
     </html>
   );

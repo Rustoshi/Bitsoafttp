@@ -27,12 +27,10 @@ export default async function UserDashboardLayout({
   const settings = await getPublicAppSettings();
 
   return (
-    <></>
+    <UserSessionProvider session={session}>
+      <DashboardLayout siteName={settings.siteName}>
+        {children}
+      </DashboardLayout>
+    </UserSessionProvider>
   );
-
-      // <UserSessionProvider session={session}>
-    //   <DashboardLayout siteName={settings.siteName}>
-    //     {children}
-    //   </DashboardLayout>
-    // </UserSessionProvider>
 }
