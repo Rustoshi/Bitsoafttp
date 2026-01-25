@@ -139,7 +139,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <></>;
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -157,6 +156,7 @@ export default function RootLayout({
             <Toaster position="top-right" />
             <TradeNotifications />
             <GTranslateWidget />
+            <LiveChatWidget />
           </QueryProvider>
         </ThemeProvider>
       </body>
