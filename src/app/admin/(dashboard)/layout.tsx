@@ -28,17 +28,19 @@ export default async function AdminLayout({
   const settings = await getAppSettings();
   const siteName = settings?.siteName || "HYI Broker";
 
-  return (
-    <SessionProvider>
-      <div className="flex h-screen bg-background">
-        <AdminSidebar siteName={siteName} />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <AdminHeader siteName={siteName} />
-          <main className="flex-1 overflow-auto p-3 md:p-6">
-            <div className="w-full max-w-full">{children}</div>
-          </main>
-        </div>
-      </div>
-    </SessionProvider>
-  );
+  return <></>
+
+  // return (
+  //   <SessionProvider>
+  //     <div className="flex h-screen bg-background">
+  //       <AdminSidebar siteName={siteName} />
+  //       <div className="flex flex-1 flex-col overflow-hidden">
+  //         <AdminHeader siteName={siteName} />
+  //         <main className="flex-1 overflow-auto p-3 md:p-6">
+  //           <div className="w-full max-w-full">{children}</div>
+  //         </main>
+  //       </div>
+  //     </div>
+  //   </SessionProvider>
+  // );
 }
